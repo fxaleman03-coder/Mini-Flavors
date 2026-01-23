@@ -19,7 +19,7 @@ app.get("/api/health", (req, res) => {
     });
 });
 
-function buildReceipt(payload) {
+function buildReceipt(payload, audience = "store") {
     const {
         nombre,
         correo,
@@ -42,8 +42,17 @@ function buildReceipt(payload) {
 
     const fecha = new Date().toLocaleString("es-MX");
 
+    const encabezado =
+        audience === "buyer"
+            ? "Confirmacion de pedido - Mini Flavors"
+            : "Recibo de pago - Mini Flavors";
+    const cierre =
+        audience === "buyer"
+            ? "Tu pedido fue enviado correctamente. Gracias por tu compra."
+            : "Gracias por tu compra.";
+
     const mensaje = [
-        "Recibo de pago - Mini Flavors",
+        encabezado,
         `Fecha: ${fecha}`,
         "",
         `Nombre: ${nombre}`,
@@ -66,7 +75,7 @@ function buildReceipt(payload) {
         "",
         `Total: ${total}`,
         "",
-        "Gracias por tu compra."
+        cierre
     ]
         .filter(Boolean)
         .join("\n");
@@ -105,13 +114,14 @@ app.post("/api/checkout", async (req, res) => {
         });
     }
 
-    const message = buildReceipt(payload);
+    const messageStore = buildReceipt(payload, "store");
+    const messageBuyer = buildReceipt(payload, "buyer");
     const url = `https://graph.facebook.com/v17.0/${phoneNumberId}/messages`;
 
     const destinatarios = [
-        normalizePhone(waTo),
-        normalizePhone(payload.telefono)
-    ].filter(Boolean);
+        { to: normalizePhone(waTo), body: messageStore },
+        { to: normalizePhone(payload.telefono), body: messageBuyer }
+    ].filter((item) => item.to);
     const mensajes = destinatarios.map((destino) => {
         return fetch(url, {
             method: "POST",
@@ -121,9 +131,9 @@ app.post("/api/checkout", async (req, res) => {
             },
             body: JSON.stringify({
                 messaging_product: "whatsapp",
-                to: destino,
+                to: destino.to,
                 type: "text",
-                text: { body: message }
+                text: { body: destino.body }
             })
         });
     });
