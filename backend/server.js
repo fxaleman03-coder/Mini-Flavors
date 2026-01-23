@@ -8,6 +8,17 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+app.get("/api/health", (req, res) => {
+    res.json({
+        ok: true,
+        env: {
+            WHATSAPP_TOKEN: Boolean(process.env.WHATSAPP_TOKEN),
+            WHATSAPP_PHONE_NUMBER_ID: Boolean(process.env.WHATSAPP_PHONE_NUMBER_ID),
+            WHATSAPP_TO: Boolean(process.env.WHATSAPP_TO)
+        }
+    });
+});
+
 function buildReceipt(payload) {
     const {
         nombre,
