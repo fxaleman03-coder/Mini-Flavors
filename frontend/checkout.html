@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-ua-compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="checkout container">
+        <div class="checkout-form">
+            <h1>Datos del comprador</h1>
+            <form id="form-checkout">
+                <label>
+                    Nombre completo
+                    <input type="text" name="nombre" required>
+                </label>
+                <label>
+                    Correo
+                    <input type="email" name="correo" required>
+                </label>
+                <label>
+                    Telefono
+                    <input type="tel" name="telefono" required>
+                </label>
+                <label>
+                    Direccion
+                    <input type="text" name="direccion" required>
+                </label>
+                <label>
+                    Notas
+                    <textarea name="notas" rows="4" placeholder="Opcional"></textarea>
+                </label>
+                <fieldset class="checkout-pago">
+                    <legend>Informacion de pago</legend>
+                    <label>
+                        Metodo de pago
+                        <select name="metodo_pago" id="metodo_pago" required>
+                            <option value="">Selecciona</option>
+                            <option value="Transferencia">Transferencia</option>
+                            <option value="Efectivo">Efectivo</option>
+                            <option value="Tarjeta">Tarjeta</option>
+                        </select>
+                    </label>
+                    <label>
+                        Referencia o numero de transaccion
+                        <input type="text" name="referencia" required>
+                    </label>
+                    <label>
+                        Monto pagado
+                        <input type="text" name="monto" required>
+                    </label>
+                    <div id="tarjeta-info" class="tarjeta-info" hidden>
+                        <label>
+                            Nombre en la tarjeta
+                            <input type="text" name="tarjeta_nombre">
+                        </label>
+                        <label>
+                            Numero de tarjeta
+                            <input type="text" name="tarjeta_numero" inputmode="numeric">
+                        </label>
+                        <label>
+                            Vencimiento
+                            <input type="text" name="tarjeta_vencimiento" placeholder="MM/AA">
+                        </label>
+                    </div>
+                </fieldset>
+                <button type="submit" class="btn-1">Confirmar pedido</button>
+            </form>
+        </div>
+        <div class="checkout-resumen">
+            <h2>Resumen del pedido</h2>
+            <div id="checkout-lista"></div>
+            <div class="carrito-total">
+                <span>Total:</span>
+                <strong id="checkout-total">$0.00</strong>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const lista = document.getElementById("checkout-lista");
+        const total = document.getElementById("checkout-total");
+        const formCheckout = document.getElementById("form-checkout");
+        const guardados = localStorage.getItem("carrito");
+        const items = guardados ? JSON.parse(guardados) : [];
+        const apiUrl = "http://localhost:3000/api/checkout";
+
+        const totalCompra = items.reduce((acc, item) => {
+            const limpio = String(item.precio || "").replace(/[^0-9.,]/g, "").replace(",", ".");
+            const precio = Number(limpio) || 0;
+            return acc + precio * (item.cantidad || 1);
+        }, 0);
+
+        if (items.length === 0) {
+            lista.innerHTML = "<p>No hay productos en el carrito.</p>";
+        } else {
+            lista.innerHTML = items
+                .map(
+                    (item) => `
+                        <div class="checkout-item">
+                            <img src="${item.imagen}" alt="${item.titulo}">
+                            <div>
+                                <strong>${item.titulo}</strong>
+                                <p>Cantidad: ${item.cantidad}</p>
+                                <p>${item.precio}</p>
+                            </div>
+                        </div>
+                    `
+                )
+                .join("");
+        }
+
+        total.textContent = `$${totalCompra.toFixed(2)}`;
+
+        const metodoPagoSelect = document.getElementById("metodo_pago");
+        const tarjetaInfo = document.getElementById("tarjeta-info");
+
+        function actualizarTarjetaInfo() {
+            if (!metodoPagoSelect || !tarjetaInfo) {
+                return;
+            }
+            const esTarjeta = metodoPagoSelect.value === "Tarjeta";
+            tarjetaInfo.hidden = !esTarjeta;
+            tarjetaInfo.querySelectorAll("input").forEach((input) => {
+                input.required = esTarjeta;
+            });
+        }
+
+        if (metodoPagoSelect) {
+            metodoPagoSelect.addEventListener("change", actualizarTarjetaInfo);
+            actualizarTarjetaInfo();
+        }
+
+        if (formCheckout) {
+            formCheckout.addEventListener("submit", (e) => {
+                e.preventDefault();
+                if (items.length === 0) {
+                    alert("Tu carrito esta vacio.");
+                    return;
+                }
+
+                const datos = new FormData(formCheckout);
+                const nombre = datos.get("nombre") || "";
+                const correo = datos.get("correo") || "";
+                const telefono = datos.get("telefono") || "";
+                const direccion = datos.get("direccion") || "";
+                const notas = datos.get("notas") || "";
+                const metodoPago = datos.get("metodo_pago") || "";
+                const referencia = datos.get("referencia") || "";
+                const monto = datos.get("monto") || "";
+                const tarjetaNombre = datos.get("tarjeta_nombre") || "";
+                const tarjetaNumero = datos.get("tarjeta_numero") || "";
+                const tarjetaVencimiento = datos.get("tarjeta_vencimiento") || "";
+
+                const lineasProductos = items
+                    .map((item) => `- ${item.titulo} x${item.cantidad} (${item.precio})`)
+                    .join("\n");
+
+                const payload = {
+                    nombre,
+                    correo,
+                    telefono,
+                    direccion,
+                    notas,
+                    metodoPago,
+                    referencia,
+                    monto,
+                    tarjetaNombre,
+                    tarjetaNumero,
+                    tarjetaVencimiento,
+                    items,
+                    total: `$${totalCompra.toFixed(2)}`
+                };
+
+                fetch(apiUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                })
+                    .then((response) => response.json())
+                    .then((data) => {
+                        if (!data.ok) {
+                            const detalle = data.details || "";
+                            if (detalle.includes("allowed list")) {
+                                throw new Error(
+                                    "El numero del comprador no esta permitido en la lista de prueba de WhatsApp."
+                                );
+                            }
+                            throw new Error(data.error || "Error enviando la orden.");
+                        }
+                        localStorage.removeItem("carrito");
+                        alert("Recibo enviado por WhatsApp. Gracias por tu compra.");
+                    })
+                    .catch((error) => {
+                        alert(error.message || "No se pudo enviar el recibo. Intenta de nuevo.");
+                    });
+            });
+        }
+    </script>
+</body>
+</html>

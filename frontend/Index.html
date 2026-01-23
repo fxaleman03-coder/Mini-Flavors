@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="x-ua-compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <header class="header" id="inicio">
+
+        <img class="bg" src="img/bg.png" alt="">
+        <div class="menu container">
+            <a href="#" class="logo">
+                <img src="img/LOGO MINI FLAVORS.jpg" alt="Logo Mini Flavors">
+            </a>
+            <input type="checkbox" id="menu">
+            <label for="menu">
+                <img src="img/menu.png" class="menu-icono" alt="">
+            </label>
+            <nav class="navbar">
+                <ul>
+                    <li><a href="#inicio">Inicio</a></li>
+                    <li><a href="#servicios">Servicios</a></li>
+                    <li><a href="#productos">Productos</a></li>
+                    <li><a href="#contacto">Contacto</a></li>
+
+                </ul>
+            </nav>
+            <div>
+                <ul>
+                    <li class="submenu">
+                        <img src="img/car.svg" id="img-carrito" alt="carrito">
+                        <span id="contador-carrito">0</span>
+                        <div id="carrito">
+                            <table id="lista-carrito">
+                                <thead>
+                                    <tr>
+                                        <th>Imagen</th>
+                                        <th>Nombre</th>
+                                        <th>Precio</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                            <div class="carrito-total">
+                                <span>Total:</span>
+                                <strong id="total-carrito">$0.00</strong>
+                            </div>
+                            <div class="carrito-acciones">
+                                <a href="#" id="vaciar-carrito" class="btn-3">vaciar carrito</a>
+                                <a href="#" id="checkout" class="btn-1">check out</a>
+                            </div>
+
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+        </div>
+        <div class="hero container">
+            <div class="header-txt">
+                <p class="kicker">Mini Flavors</p>
+                <h1><span>Bienvenido</span> Disfruta de Nuestros Dulces</h1>
+                
+            </div>
+            <div class="header-img">
+                <img src="img/LOGO MINI FLAVORS.jpg" alt="Logo Mini Flavors">
+            </div>
+        </div>
+    </header>
+
+        <section class=" dulces grandes content" id="servicios">
+
+            <h2>Dulces Grandes</h2>
+            <p>
+                Horario 8am - 8pm
+            </p>
+            <p id="servicios-extra" class="servicios-extra">
+                Postres finos y de la mejor calidad para fiestas y todos los eventos especiales
+            </p>
+
+            <div class="Dulces Grandes">
+
+                <div class="Dulces Grandes-1">
+                    <img src="img/Cheesecake biscoff grande.jpeg" alt="">
+                    <h3>Cheesecake Biscoff</h3>
+                    <p class="precio">$50.00</p>
+                    <a href="#" class="agregar-carrito btn-3" data-id="101">Agregar al carrito</a>
+                </div>
+                <div class="Dulces Grandes-1">
+                    <img src="img/Cheesecake Oreo Grande.jpeg" alt="">
+                    <h3>Cheesecake Oreo</h3>
+                    <p class="precio">$50.00</p>
+                    <a href="#" class="agregar-carrito btn-3" data-id="102">Agregar al carrito</a>
+                </div>
+                <div class="Dulces Grandes-1">
+                    <img src="img/Cheesecake frutos rojos grande.jpeg" alt="">
+                    <h3>Cheesecake Frutos Rojos</h3>
+                    <p class="precio">$50.00</p>
+                    <a href="#" class="agregar-carrito btn-3" data-id="103">Agregar al carrito</a>
+                </div>
+                <div class="Dulces Grandes-1">
+                    <img src="img/Keylime Pay Grande.jpeg" alt="">
+                    <h3>Keylime Pay</h3>
+                    <p class="precio">$50.00</p>
+                    <a href="#" class="agregar-carrito btn-3" data-id="104">Agregar al carrito</a>
+                </div>
+                <div class="Dulces Grandes-1">
+                    <img src="img/Tres Leches Grande.jpeg" alt="">
+                    <h3>Tres Leches</h3>
+                    <p class="precio">$50.00</p>
+                    <a href="#" class="agregar-carrito btn-3" data-id="105">Agregar al carrito</a>
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+        <section class="info">
+            <img class="bg-2" src="img/bg-2.png" alt="">
+            <div class="info-content container">
+
+                <div class="info-img">
+                    <img src="img/Cheesecake biscoff.jpeg" alt="">
+                </div>
+                <div class="info-txt">
+                    <h2>La mejor Calidad en los productos</h2>
+                    
+                    
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+                <main class="product container" id="productos">
+
+            <h2>Productos</h2>
+
+            <div class="box-container" id="lista-1">
+                <div class="box">
+                    <img src="img/Cheesecake Frutos Rojos .jpeg" alt="Cheesecake de Frutos Rojos">
+                    <div class="product-txt">
+                        <h3>Chessecake de Frutos Rojos</h3>
+                        <p>Elaborado con frutos frescos</p>
+                        <p class="precio">$35.00 la docena</p>
+                        <a href="#" class="agregar-carrito btn-3" data-id="1">Agregar al carrito</a>
+                    </div>
+                </div>
+
+                <div class="box">
+                    <img src="img/cheesecake Oreo.jpeg" alt="Cheesecake Oreo">
+                    <div class="product-txt">
+                        <h3>Chessecake Oreo</h3>
+                        <p>Que Rico</p>
+                        <p class="precio">#35.00 la docena</p>
+                        <a href="#" class="agregar-carrito btn-3" data-id="2">Agregar al carrito</a>
+                    </div>
+                </div>
+
+                <div class="box">
+                    <img src="img/Chocoflan .jpeg" alt="Chocoflan">
+                    <div class="product-txt">
+                        <h3>Chocoflan</h3>
+                        <p>Elaborado con el Mejor Chocolate</p>
+                        <p class="precio">$35.00 la docena</p>
+                        <a href="#" class="agregar-carrito btn-3" data-id="3">Agregar al carrito</a>
+                    </div>
+                </div>
+
+                <div class="box">
+                    <img src="img/Flan.jpeg" alt="Flan">
+                    <div class="product-txt">
+                        <h3>Flan</h3>
+                        <p>Elaborado Pensando en tu Paladar</p>
+                        <p class="precio">$35.00 la docena</p>
+                        <a href="#" class="agregar-carrito btn-3" data-id="4">Agregar al carrito</a>
+                    </div>
+                </div>
+
+                <div class="box">
+                    <img src="img/Gelatina de fresa.jpeg" alt="Gelatina de Fresa">
+                    <div class="product-txt">
+                        <h3>Gelatina de Fresa</h3>
+                        <p>Elaborado con fresas frescas</p>
+                        <p class="precio">$35.00 la docena</p>
+                        <a href="#" class="agregar-carrito btn-3" data-id="5">Agregar al carrito</a>
+                    </div>
+                </div>
+
+                <div class="box">
+                    <img src="img/Gelatina Ferrero Rocher.jpeg" alt="Gelatina Ferrero Rocher">
+                    <div class="product-txt">
+                        <h3>Gelatina Ferrero Rocher</h3>
+                        <p>Calidad Superior</p>
+                        <p class="precio">$35.00 la docena</p>
+                        <a href="#" class="agregar-carrito btn-3" data-id="6">Agregar al carrito</a>
+                    </div>
+                </div>
+
+                <div class="box">
+                    <img src="img/Gelatina Pina Colada.jpeg" alt="Gelatina Pina Colada">
+                    <div class="product-txt">
+                        <h3>Gelatina Pina Colada</h3>
+                        <p>Delicioso</p>
+                        <p class="precio">$35.00 la docena</p>
+                        <a href="#" class="agregar-carrito btn-3" data-id="7">Agregar al carrito</a>
+                    </div>
+                </div>
+
+                <div class="box">
+                    <img src="img/Keylime Pay.jpeg" alt="Keylime Pay">
+                    <div class="product-txt">
+                        <h3>Keylime Pay</h3>
+                        <p>El Sabor de los Cayos</p>
+                        <p class="precio">$35.00 la docena</p>
+                        <a href="#" class="agregar-carrito btn-3" data-id="8">Agregar al carrito</a>
+                    </div>
+                </div>
+
+                <div class="box">
+                    <img src="img/Cheesecake biscoff grande.jpeg" alt="Cheesecake Biscoff Grande">
+                    <div class="product-txt">
+                        <h3>Cheesecake Biscoff Grande</h3>
+                        <p>Elaborado con frutos frescos</p>
+                        <p class="precio">$45.00</p>
+                        <a href="#" class="agregar-carrito btn-3" data-id="9">Agregar al carrito</a>
+                    </div>
+                </div>
+
+                <div class="box">
+                    <img src="img/Cheesecake frutos rojos grande.jpeg" alt="Cheesecake Frutos Rojos Grande">
+                    <div class="product-txt">
+                        <h3>Cheesecake Frutos Rojos Grande</h3>
+                        <p>Elaborado con frutos frescos</p>
+                        <p class="precio">#45.00</p>
+                        <a href="#" class="agregar-carrito btn-3" data-id="10">Agregar al carrito</a>
+                    </div>
+                </div>
+
+                <div class="box">
+                    <img src="img/Cheesecake Oreo Grande.jpeg" alt="Cheesecake Oreo Grande">
+                    <div class="product-txt">
+                        <h3>Cheesecake Oreo Grande</h3>
+                        <p></p>
+                        <p class="precio">$45.00</p>
+                        <a href="#" class="agregar-carrito btn-3" data-id="11">Agregar al carrito</a>
+                    </div>
+                </div>
+
+                <div class="box">
+                    <img src="img/Keylime Pay Grande.jpeg" alt="Keylime Pay Grande">
+                    <div class="product-txt">
+                        <h3>Keylime Pay Grande</h3>
+                        <p></p>
+                        <p class="precio">$45.00</p>
+                        <a href="#" class="agregar-carrito btn-3" data-id="12">Agregar al carrito</a>
+                    </div>
+                </div>
+
+                <div class="box">
+                    <img src="img/Tres Leches Grande.jpeg" alt="Tres Leches Grande">
+                    <div class="product-txt">
+                        <h3>Tres Leches Grande</h3>
+                        <p></p>
+                        <p class="precio">$45.00</p>
+                        <a href="#" class="agregar-carrito btn-3" data-id="13">Agregar al carrito</a>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+
+        
+
+
+        <footer class="footer" id="contacto">
+            <div class="footer-content container">
+                <div id="contacto-info" class="contacto-info">
+                    <h3>Contacto</h3>
+                    <p>Mini Flavors</p>
+                    <p>Tel: (561) 893-7020</p>
+                    <p>Horario: 8am - 8pm</p>
+                    <p>Correo: gleibyth1205@yahoo.es</p>
+                </div>
+            </div>
+        </footer>
+
+
+
+
+
+        <script src="Script.js"></script>
+
+
+
+
+</body>
+
+</html>
