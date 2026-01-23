@@ -139,6 +139,7 @@ app.post("/api/checkout", async (req, res) => {
     });
 
     try {
+        console.log("Enviando WhatsApp a:", destinatarios);
         const responses = await Promise.all(mensajes);
         const detalles = await Promise.all(
             responses.map(async (response) => ({
