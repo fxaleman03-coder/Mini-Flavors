@@ -18,8 +18,7 @@ Proyecto con frontend separado y backend en Node.js para enviar recibos por What
 2) Completa estos valores en `backend/.env`:
    - `WHATSAPP_TOKEN`
    - `WHATSAPP_PHONE_NUMBER_ID`
-   - `WHATSAPP_TO` (formato E.164, ej: `15618937020`)
-
+   - `WHATSAPP_TO`= 15618937020
 ## Ejecutar backend
 ```bash
 cd backend
