@@ -44,7 +44,12 @@
                     </label>
                     <label>
                         Referencia o numero de transaccion
-                        <input type="text" name="referencia" required>
+                        <input
+                            type="text"
+                            name="referencia"
+                            id="referencia"
+                            readonly
+                            placeholder="Se asigna automaticamente">
                     </label>
                     <label>
                         Monto pagado
@@ -77,6 +82,7 @@
             window.location.hostname === "localhost"
                 ? "http://localhost:3000/api/checkout"
                 : "https://mini-flavors.onrender.com/api/checkout";
+        const referenciaInput = document.getElementById("referencia");
 
         const totalCompra = items.reduce((acc, item) => {
             const limpio = String(item.precio || "").replace(/[^0-9.,]/g, "").replace(",", ".");
@@ -147,12 +153,6 @@
                     .then((response) => response.json())
                     .then((data) => {
                         if (!data.ok) {
-                            const detalle = data.details || "";
-                            if (detalle.includes("allowed list")) {
-                                throw new Error(
-                                    "El numero del comprador no esta permitido en la lista de prueba de WhatsApp."
-                                );
-                            }
                             throw new Error(data.error || "Error enviando la orden.");
                         }
                         localStorage.removeItem("carrito");
@@ -166,9 +166,16 @@
                                 // ignore cross-window errors
                             }
                         }
-                        alert("Recibo enviado por email. Gracias por tu compra.");
+                        if (referenciaInput && data.orderNumber) {
+                            referenciaInput.value = data.orderNumber;
+                        }
+                        const numeroOrden = data.orderNumber ? ` #${data.orderNumber}` : "";
+                        alert(`Recibo enviado por email${numeroOrden}. Gracias por tu compra.`);
                         const mensajeCerrar = document.getElementById("checkout-cerrar");
                         if (mensajeCerrar) {
+                            mensajeCerrar.textContent = data.orderNumber
+                                ? `El pedido ${data.orderNumber} fue enviado. Puedes cerrar esta pestaña.`
+                                : "El pedido fue enviado. Puedes cerrar esta pestaña.";
                             mensajeCerrar.hidden = false;
                             mensajeCerrar.scrollIntoView({ behavior: "smooth", block: "center" });
                         }
