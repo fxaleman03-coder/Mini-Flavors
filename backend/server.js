@@ -23,7 +23,9 @@ async function ensureDatabase() {
     if (!pool || dbReady) {
         return;
     }
-    await pool.query("CREATE SEQUENCE IF NOT EXISTS order_number_seq START 0");
+    await pool.query(
+        "CREATE SEQUENCE IF NOT EXISTS order_number_seq MINVALUE 0 START 0"
+    );
     await pool.query(`
         CREATE TABLE IF NOT EXISTS orders (
             id BIGSERIAL PRIMARY KEY,
