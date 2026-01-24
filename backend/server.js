@@ -1,7 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const nodemailer = require("nodemailer");
+const sgMail = require("@sendgrid/mail");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -13,8 +13,8 @@ app.get("/api/health", (req, res) => {
     res.json({
         ok: true,
         env: {
-            EMAIL_USER: Boolean(process.env.EMAIL_USER),
-            EMAIL_PASS: Boolean(process.env.EMAIL_PASS),
+            SENDGRID_API_KEY: Boolean(process.env.SENDGRID_API_KEY),
+            EMAIL_FROM: Boolean(process.env.EMAIL_FROM),
             EMAIL_TO: Boolean(process.env.EMAIL_TO)
         }
     });
@@ -78,11 +78,11 @@ function buildReceipt(payload, audience = "store") {
 }
 
 app.post("/api/checkout", async (req, res) => {
-    const emailUser = process.env.EMAIL_USER;
-    const emailPass = process.env.EMAIL_PASS;
+    const sendgridApiKey = process.env.SENDGRID_API_KEY;
+    const emailFrom = process.env.EMAIL_FROM;
     const emailTo = process.env.EMAIL_TO;
 
-    if (!emailUser || !emailPass || !emailTo) {
+    if (!sendgridApiKey || !emailFrom || !emailTo) {
         return res.status(500).json({
             ok: false,
             error: "Faltan variables de entorno de email."
@@ -97,13 +97,7 @@ app.post("/api/checkout", async (req, res) => {
         });
     }
 
-    const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-            user: emailUser,
-            pass: emailPass
-        }
-    });
+    sgMail.setApiKey(sendgridApiKey);
 
     const messageStore = buildReceipt(payload, "store");
     const messageBuyer = buildReceipt(payload, "buyer");
@@ -123,8 +117,8 @@ app.post("/api/checkout", async (req, res) => {
         console.log("Enviando email a:", destinatarios.map((item) => item.to));
         const results = await Promise.all(
             destinatarios.map((mail) =>
-                transporter.sendMail({
-                    from: emailUser,
+                sgMail.send({
+                    from: emailFrom,
                     to: mail.to,
                     subject: mail.subject,
                     text: mail.text

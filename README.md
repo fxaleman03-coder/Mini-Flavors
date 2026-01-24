@@ -8,7 +8,7 @@ Proyecto con frontend separado y backend en Node.js para enviar recibos por emai
 
 ## Requisitos
 - Node.js 18+ (incluye npm)
-- Cuenta de Gmail con contraseña de aplicacion
+- Cuenta de SendGrid con remitente verificado
 
 ## Configuracion del backend
 1) Copia el archivo `.env.example` a `.env`:
@@ -16,8 +16,8 @@ Proyecto con frontend separado y backend en Node.js para enviar recibos por emai
    cp backend/.env.example backend/.env
    ```
 2) Completa estos valores en `backend/.env`:
-   - `EMAIL_USER`
-   - `EMAIL_PASS`
+   - `SENDGRID_API_KEY`
+   - `EMAIL_FROM`
    - `EMAIL_TO`
 ## Ejecutar backend
 ```bash
@@ -34,8 +34,8 @@ python3 -m http.server 8000
 ```
 Luego abre `http://localhost:8000/Index.html`.
 
-## Notas de email (Gmail)
-- Usa una contraseña de aplicacion (App Password), no la clave normal.
+## Notas de email (SendGrid)
+- Verifica el remitente en SendGrid y usa esa direccion en `EMAIL_FROM`.
 - El correo del comprador recibira confirmacion si el campo `correo` esta lleno.
 
 ## Puntos importantes en el codigo
