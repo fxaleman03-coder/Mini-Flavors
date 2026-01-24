@@ -145,14 +145,27 @@ function escapeHtml(value) {
         .replace(/'/g, "&#39;");
 }
 
+function escapeCsv(value) {
+    const str = String(value ?? "");
+    if (/[",\n]/.test(str)) {
+        return `"${str.replace(/"/g, '""')}"`;
+    }
+    return str;
+}
+
 app.get("/admin/orders", requireAdmin, async (req, res) => {
     if (!pool) {
         return res.status(500).send("Base de datos no configurada.");
     }
     try {
         await ensureDatabase();
+        const sort = req.query.sort === "alpha" ? "alpha" : "recent";
+        const orderBy =
+            sort === "alpha"
+                ? "ORDER BY nombre ASC, created_at DESC"
+                : "ORDER BY created_at DESC";
         const result = await pool.query(
-            "SELECT order_number, nombre, correo, telefono, metodo_pago, monto, total, items, created_at FROM orders ORDER BY created_at DESC LIMIT 200"
+            `SELECT order_number, nombre, correo, telefono, metodo_pago, monto, total, items, created_at FROM orders ${orderBy} LIMIT 200`
         );
         const rows = result.rows
             .map((row) => {
@@ -194,6 +207,13 @@ app.get("/admin/orders", requireAdmin, async (req, res) => {
             </head>
             <body>
                 <h1>Ordenes recientes</h1>
+                <div style="margin-bottom: 16px;">
+                    <a href="/admin/orders?sort=recent">Ordenar por fecha</a>
+                    |
+                    <a href="/admin/orders?sort=alpha">Ordenar alfabeticamente</a>
+                    |
+                    <a href="/admin/orders.csv?sort=${sort}">Exportar CSV</a>
+                </div>
                 <table>
                     <thead>
                         <tr>
@@ -216,6 +236,62 @@ app.get("/admin/orders", requireAdmin, async (req, res) => {
     } catch (error) {
         console.error("Admin orders error:", error);
         return res.status(500).send("Error cargando ordenes.");
+    }
+});
+
+app.get("/admin/orders.csv", requireAdmin, async (req, res) => {
+    if (!pool) {
+        return res.status(500).send("Base de datos no configurada.");
+    }
+    try {
+        await ensureDatabase();
+        const sort = req.query.sort === "alpha" ? "alpha" : "recent";
+        const orderBy =
+            sort === "alpha"
+                ? "ORDER BY nombre ASC, created_at DESC"
+                : "ORDER BY created_at DESC";
+        const result = await pool.query(
+            `SELECT order_number, nombre, correo, telefono, metodo_pago, monto, total, items, created_at FROM orders ${orderBy} LIMIT 200`
+        );
+
+        const header = [
+            "orden",
+            "nombre",
+            "correo",
+            "telefono",
+            "metodo",
+            "monto",
+            "total",
+            "productos",
+            "fecha"
+        ].join(",");
+
+        const lines = result.rows.map((row) => {
+            const items = Array.isArray(row.items) ? row.items : [];
+            const itemsText = items
+                .map((item) => `${item.titulo} x${item.cantidad} (${item.precio})`)
+                .join(" | ");
+            return [
+                `#${String(row.order_number).padStart(4, "0")}`,
+                row.nombre,
+                row.correo,
+                row.telefono,
+                row.metodo_pago,
+                row.monto,
+                row.total,
+                itemsText,
+                new Date(row.created_at).toLocaleString("es-MX")
+            ]
+                .map(escapeCsv)
+                .join(",");
+        });
+
+        res.set("Content-Type", "text/csv; charset=utf-8");
+        res.set("Content-Disposition", "attachment; filename=\"ordenes.csv\"");
+        res.send([header, ...lines].join("\n"));
+    } catch (error) {
+        console.error("Admin orders csv error:", error);
+        return res.status(500).send("Error exportando ordenes.");
     }
 });
 
