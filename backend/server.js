@@ -17,8 +17,10 @@ const pool = process.env.DATABASE_URL
       })
     : null;
 
+let dbReady = false;
+
 async function ensureDatabase() {
-    if (!pool) {
+    if (!pool || dbReady) {
         return;
     }
     await pool.query("CREATE SEQUENCE IF NOT EXISTS order_number_seq START 0");
@@ -38,6 +40,7 @@ async function ensureDatabase() {
             created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
         )
     `);
+    dbReady = true;
 }
 
 app.get("/api/health", (req, res) => {
@@ -145,6 +148,7 @@ app.get("/admin/orders", requireAdmin, async (req, res) => {
         return res.status(500).send("Base de datos no configurada.");
     }
     try {
+        await ensureDatabase();
         const result = await pool.query(
             "SELECT order_number, nombre, correo, telefono, metodo_pago, monto, total, items, created_at FROM orders ORDER BY created_at DESC LIMIT 200"
         );
@@ -238,6 +242,7 @@ app.post("/api/checkout", async (req, res) => {
 
     let referencia = "0000";
     try {
+        await ensureDatabase();
         const insertResult = await pool.query(
             `
                 INSERT INTO orders
