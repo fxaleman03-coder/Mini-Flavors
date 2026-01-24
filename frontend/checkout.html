@@ -38,9 +38,8 @@
                         Metodo de pago
                         <select name="metodo_pago" id="metodo_pago" required>
                             <option value="">Selecciona</option>
-                            <option value="Transferencia">Transferencia</option>
+                            <option value="Zelle">Transferencia por Zelle</option>
                             <option value="Efectivo">Efectivo</option>
-                            <option value="Tarjeta">Tarjeta</option>
                         </select>
                     </label>
                     <label>
@@ -51,20 +50,6 @@
                         Monto pagado
                         <input type="text" name="monto" required>
                     </label>
-                    <div id="tarjeta-info" class="tarjeta-info" hidden>
-                        <label>
-                            Nombre en la tarjeta
-                            <input type="text" name="tarjeta_nombre">
-                        </label>
-                        <label>
-                            Numero de tarjeta
-                            <input type="text" name="tarjeta_numero" inputmode="numeric">
-                        </label>
-                        <label>
-                            Vencimiento
-                            <input type="text" name="tarjeta_vencimiento" placeholder="MM/AA">
-                        </label>
-                    </div>
                 </fieldset>
                 <button type="submit" class="btn-1">Confirmar pedido</button>
             </form>
@@ -78,6 +63,9 @@
             </div>
         </div>
     </main>
+    <p id="checkout-cerrar" class="checkout-cerrar" hidden>
+        El pedido fue enviado. Puedes cerrar esta pestaña.
+    </p>
 
     <script>
         const lista = document.getElementById("checkout-lista");
@@ -85,7 +73,10 @@
         const formCheckout = document.getElementById("form-checkout");
         const guardados = localStorage.getItem("carrito");
         const items = guardados ? JSON.parse(guardados) : [];
-        const apiUrl = "https://mini-flavors.onrender.com/api/checkout";
+        const apiUrl =
+            window.location.hostname === "localhost"
+                ? "http://localhost:3000/api/checkout"
+                : "https://mini-flavors.onrender.com/api/checkout";
 
         const totalCompra = items.reduce((acc, item) => {
             const limpio = String(item.precio || "").replace(/[^0-9.,]/g, "").replace(",", ".");
@@ -114,25 +105,6 @@
 
         total.textContent = `$${totalCompra.toFixed(2)}`;
 
-        const metodoPagoSelect = document.getElementById("metodo_pago");
-        const tarjetaInfo = document.getElementById("tarjeta-info");
-
-        function actualizarTarjetaInfo() {
-            if (!metodoPagoSelect || !tarjetaInfo) {
-                return;
-            }
-            const esTarjeta = metodoPagoSelect.value === "Tarjeta";
-            tarjetaInfo.hidden = !esTarjeta;
-            tarjetaInfo.querySelectorAll("input").forEach((input) => {
-                input.required = esTarjeta;
-            });
-        }
-
-        if (metodoPagoSelect) {
-            metodoPagoSelect.addEventListener("change", actualizarTarjetaInfo);
-            actualizarTarjetaInfo();
-        }
-
         if (formCheckout) {
             formCheckout.addEventListener("submit", (e) => {
                 e.preventDefault();
@@ -150,10 +122,6 @@
                 const metodoPago = datos.get("metodo_pago") || "";
                 const referencia = datos.get("referencia") || "";
                 const monto = datos.get("monto") || "";
-                const tarjetaNombre = datos.get("tarjeta_nombre") || "";
-                const tarjetaNumero = datos.get("tarjeta_numero") || "";
-                const tarjetaVencimiento = datos.get("tarjeta_vencimiento") || "";
-
                 const lineasProductos = items
                     .map((item) => `- ${item.titulo} x${item.cantidad} (${item.precio})`)
                     .join("\n");
@@ -167,9 +135,6 @@
                     metodoPago,
                     referencia,
                     monto,
-                    tarjetaNombre,
-                    tarjetaNumero,
-                    tarjetaVencimiento,
                     items,
                     total: `$${totalCompra.toFixed(2)}`
                 };
@@ -191,7 +156,23 @@
                             throw new Error(data.error || "Error enviando la orden.");
                         }
                         localStorage.removeItem("carrito");
-                        alert("Recibo enviado por WhatsApp. Gracias por tu compra.");
+                        localStorage.setItem("carrito", "[]");
+                        if (window.opener && !window.opener.closed) {
+                            try {
+                                window.opener.localStorage.removeItem("carrito");
+                                window.opener.localStorage.setItem("carrito", "[]");
+                                window.opener.location.reload();
+                            } catch (e) {
+                                // ignore cross-window errors
+                            }
+                        }
+                        alert("Recibo enviado por email. Gracias por tu compra.");
+                        const mensajeCerrar = document.getElementById("checkout-cerrar");
+                        if (mensajeCerrar) {
+                            mensajeCerrar.hidden = false;
+                            mensajeCerrar.scrollIntoView({ behavior: "smooth", block: "center" });
+                        }
+                        window.close();
                     })
                     .catch((error) => {
                         alert(error.message || "No se pudo enviar el recibo. Intenta de nuevo.");

@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const nodemailer = require("nodemailer");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -12,9 +13,9 @@ app.get("/api/health", (req, res) => {
     res.json({
         ok: true,
         env: {
-            WHATSAPP_TOKEN: Boolean(process.env.WHATSAPP_TOKEN),
-            WHATSAPP_PHONE_NUMBER_ID: Boolean(process.env.WHATSAPP_PHONE_NUMBER_ID),
-            WHATSAPP_TO: Boolean(process.env.WHATSAPP_TO)
+            EMAIL_USER: Boolean(process.env.EMAIL_USER),
+            EMAIL_PASS: Boolean(process.env.EMAIL_PASS),
+            EMAIL_TO: Boolean(process.env.EMAIL_TO)
         }
     });
 });
@@ -29,9 +30,6 @@ function buildReceipt(payload, audience = "store") {
         metodoPago,
         referencia,
         monto,
-        tarjetaNombre,
-        tarjetaNumero,
-        tarjetaVencimiento,
         items,
         total
     } = payload;
@@ -65,10 +63,6 @@ function buildReceipt(payload, audience = "store") {
         `Metodo: ${metodoPago}`,
         `Referencia: ${referencia}`,
         `Monto: ${monto}`,
-        metodoPago === "Tarjeta" ? "Tarjeta:" : "",
-        metodoPago === "Tarjeta" ? `Nombre: ${tarjetaNombre}` : "",
-        metodoPago === "Tarjeta" ? `Numero: ${tarjetaNumero}` : "",
-        metodoPago === "Tarjeta" ? `Vencimiento: ${tarjetaVencimiento}` : "",
         "",
         "Detalle de productos:",
         lineasProductos || "Sin productos",
@@ -83,26 +77,15 @@ function buildReceipt(payload, audience = "store") {
     return mensaje;
 }
 
-function normalizePhone(input) {
-    if (!input) {
-        return "";
-    }
-    const digits = String(input).replace(/\D/g, "");
-    if (digits.length === 10) {
-        return `1${digits}`;
-    }
-    return digits;
-}
-
 app.post("/api/checkout", async (req, res) => {
-    const token = process.env.WHATSAPP_TOKEN;
-    const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-    const waTo = process.env.WHATSAPP_TO;
+    const emailUser = process.env.EMAIL_USER;
+    const emailPass = process.env.EMAIL_PASS;
+    const emailTo = process.env.EMAIL_TO;
 
-    if (!token || !phoneNumberId || !waTo) {
+    if (!emailUser || !emailPass || !emailTo) {
         return res.status(500).json({
             ok: false,
-            error: "Faltan variables de entorno de WhatsApp."
+            error: "Faltan variables de entorno de email."
         });
     }
 
@@ -114,57 +97,48 @@ app.post("/api/checkout", async (req, res) => {
         });
     }
 
-    const messageStore = buildReceipt(payload, "store");
-    const messageBuyer = buildReceipt(payload, "buyer");
-    const url = `https://graph.facebook.com/v17.0/${phoneNumberId}/messages`;
-
-    const destinatarios = [
-        { to: normalizePhone(waTo), body: messageStore },
-        { to: normalizePhone(payload.telefono), body: messageBuyer }
-    ].filter((item) => item.to);
-    const mensajes = destinatarios.map((destino) => {
-        return fetch(url, {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${token}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                messaging_product: "whatsapp",
-                to: destino.to,
-                type: "text",
-                text: { body: destino.body }
-            })
-        });
+    const transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: emailUser,
+            pass: emailPass
+        }
     });
 
+    const messageStore = buildReceipt(payload, "store");
+    const messageBuyer = buildReceipt(payload, "buyer");
+
+    const destinatarios = [
+        { to: emailTo, subject: "Nuevo pedido - Mini Flavors", text: messageStore }
+    ];
+    if (payload.correo) {
+        destinatarios.push({
+            to: payload.correo,
+            subject: "Confirmacion de pedido - Mini Flavors",
+            text: messageBuyer
+        });
+    }
+
     try {
-        console.log("Enviando WhatsApp a:", destinatarios);
-        const responses = await Promise.all(mensajes);
-        const detalles = await Promise.all(
-            responses.map(async (response) => ({
-                ok: response.ok,
-                status: response.status,
-                text: await response.text()
-            }))
+        console.log("Enviando email a:", destinatarios.map((item) => item.to));
+        const results = await Promise.all(
+            destinatarios.map((mail) =>
+                transporter.sendMail({
+                    from: emailUser,
+                    to: mail.to,
+                    subject: mail.subject,
+                    text: mail.text
+                })
+            )
         );
 
-        const fallo = detalles.find((item) => !item.ok);
-        if (fallo) {
-            console.error("WhatsApp API error:", fallo.status, fallo.text);
-            return res.status(500).json({
-                ok: false,
-                error: "Error enviando WhatsApp.",
-                details: fallo.text
-            });
-        }
-
-        console.log("WhatsApp API ok:", detalles);
+        console.log("Emails enviados:", results.length);
         return res.json({ ok: true });
     } catch (error) {
+        console.error("Email error:", error);
         return res.status(500).json({
             ok: false,
-            error: "Fallo inesperado al enviar WhatsApp."
+            error: "Fallo inesperado al enviar email."
         });
     }
 });
