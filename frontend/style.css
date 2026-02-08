@@ -390,8 +390,24 @@ a {
     box-shadow: var(--shadow);
 }
 
+.info-img {
+    text-align: center;
+}
+
 .info-img img {
+    max-width: 320px;
+    width: 100%;
     border-radius: 18px;
+}
+
+.info-img h3 {
+    margin: 14px 0 6px;
+    font-size: 20px;
+}
+
+.info-img .precio {
+    margin-bottom: 14px;
+    font-weight: 600;
 }
 
 .info-txt h2 {
@@ -663,5 +679,35 @@ a {
 
     .app {
         padding: 28px;
+    }
+}
+
+
+.corner-video {
+    position: fixed;
+    top: 16px;
+    left: 16px;
+    width: 240px;
+    aspect-ratio: 16 / 9;
+    background: rgba(255, 255, 255, 0.85);
+    border: 1px solid var(--stroke);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    z-index: 9999;
+}
+
+.corner-video video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .corner-video {
+        width: 240px;
+        top: 10px;
+        left: 10px;
     }
 }
